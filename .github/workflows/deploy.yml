@@ -2,23 +2,31 @@ name: Build and Deploy
 
 on:
   push:
-    branches: [ "main" ]  # Se déclenche sur push vers main
+    branches: [ "main" ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Build Docker image
-      run: docker build -t votre-app .
-      
-    - name: Notify deployment API
-      env:
-        API_TOKEN: ${{ secrets.API_TOKEN }}
-      run: |
-        curl -X POST "http://votre-api.com/deploy" \
-          -H "Authorization: Bearer $API_TOKEN" \
-          -H "Content-Type: application/json" \
-          -d '{"commit": "${{ github.sha }}"}'
+      # Construire l'image Docker (localement sur GitHub Actions)
+      - name: Build Docker image
+        run: docker build -t votre-app .
+
+      # Notifier ton API de déploiement
+      - name: Notify deployment API
+        env:
+          API_TOKEN: ${{ secrets.API_TOKEN }}
+        run: |
+          curl -X POST "http://192.168.1.12:8080/api/deployments" \
+            -H "Authorization: Bearer $API_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{
+                  "project_id": 1,
+                  "server_id": 16,
+                  "git_repo": "https://github.com/ClayJense/devops-test-app",
+                  "branch": "main",
+                  "dockerfile": "Dockerfile"
+                }'
