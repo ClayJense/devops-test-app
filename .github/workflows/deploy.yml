@@ -1,0 +1,24 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ "main" ]  # Se déclenche sur push vers main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Build Docker image
+      run: docker build -t votre-app .
+      
+    - name: Notify deployment API
+      env:
+        API_TOKEN: ${{ secrets.API_TOKEN }}
+      run: |
+        curl -X POST "http://votre-api.com/deploy" \
+          -H "Authorization: Bearer $API_TOKEN" \
+          -H "Content-Type: application/json" \
+          -d '{"commit": "${{ github.sha }}"}'
