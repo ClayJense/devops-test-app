@@ -1,34 +1,14 @@
-# Étape 1 : builder
-FROM golang:1.21 as builder
+# Étape 1 : Utiliser l'image Nginx officielle
+FROM nginx:alpine
 
-# Répertoire de travail
-WORKDIR /app
+# Supprimer la configuration par défaut
+RUN rm -rf /usr/share/nginx/html/*
 
-# Copier les fichiers go.mod/go.sum et télécharger les dépendances
-COPY go.mod go.sum ./
-RUN go mod download
+# Copier les fichiers de ton repo dans le répertoire Nginx
+COPY . /usr/share/nginx/html
 
-# Copier le reste du code
-COPY . .
+# Exposer le port 80
+EXPOSE 80
 
-# Compilation statique
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o /devops-app
-
-# --------------------------------------------------------
-# Étape 2 : image finale légère
-FROM alpine:3.18
-
-# Installer dépendances minimes
-RUN apk add --no-cache ca-certificates
-
-# Copier l'application compilée depuis le builder
-COPY --from=builder /devops-app /app/devops-app
-
-# Permissions
-RUN chmod +x /app/devops-app
-
-# Port exposé
-EXPOSE 8080
-
-# Commande au lancement du container
-CMD ["/app/devops-app"]
+# Point d'entrée par défaut (déjà défini dans l'image Nginx)
+CMD ["nginx", "-g", "daemon off;"]
