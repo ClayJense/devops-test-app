@@ -1,14 +1,14 @@
-# Étape 1 : Utiliser l'image Nginx officielle
+# Dockerfile pour une app web statique
 FROM nginx:alpine
 
-# Supprimer la configuration par défaut
+# Supprimer la configuration HTML par défaut
 RUN rm -rf /usr/share/nginx/html/*
 
-# Copier les fichiers de ton repo dans le répertoire Nginx
+# Copier tous les fichiers du repo dans Nginx
 COPY . /usr/share/nginx/html
 
 # Exposer le port 80
 EXPOSE 80
 
-# Point d'entrée par défaut (déjà défini dans l'image Nginx)
+# Commande par défaut pour Nginx
 CMD ["nginx", "-g", "daemon off;"]
